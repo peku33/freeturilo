@@ -1,4 +1,5 @@
 apply plugin: 'application'
+apply plugin: 'eclipse'
 
 mainClassName = 'Main'
 
@@ -8,5 +9,6 @@ repositories {
 
 dependencies {
 	compile 'com.graphhopper:graphhopper-reader-osm:+'
+	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '+'
     testImplementation 'junit:junit:+'
 }
