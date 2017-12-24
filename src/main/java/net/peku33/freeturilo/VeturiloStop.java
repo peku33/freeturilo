@@ -31,7 +31,6 @@ public class VeturiloStop {
 	public double getLatitude() {
 		return latitude;
 	}
-
 	public double getLongitude() {
 		return longitude;
 	}
@@ -41,15 +40,22 @@ public class VeturiloStop {
 	}
 	
 	@Override
-	public boolean equals(Object object) {
-		if(object == null)
-			return false;
-		if(object == this)
+	public String toString() {
+		return String.format("#%d: %s (%f / %f)", uid, name, latitude, longitude);
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
 			return true;
-		if(!(object instanceof VeturiloStop))
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
 			return false;
 		
-		return uid == ((VeturiloStop) object).uid;
+		VeturiloStop other = (VeturiloStop) obj;
+		
+		return uid == other.uid;
 	}
 	
 	@Override
