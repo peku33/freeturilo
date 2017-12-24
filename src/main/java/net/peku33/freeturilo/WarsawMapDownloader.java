@@ -1,6 +1,5 @@
 package net.peku33.freeturilo;
 
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.util.Date;
@@ -16,7 +15,6 @@ import org.apache.http.client.methods.HttpHead;
 import org.apache.http.client.utils.DateUtils;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.util.EntityUtils;
 
 /**
  * Klasa zarządzająca pobieraniem danych OSM dla Warszawy
@@ -31,7 +29,7 @@ public class WarsawMapDownloader {
 	private static final String REMOTE_GZ_PATH = "https://download.bbbike.org/osm/bbbike/Warsaw/Warsaw.osm.gz";
 	
 	// Ścieżka lokalnego pliku .osm
-	private static final String LOCAL_PATH = "download/Warsaw.osm";
+	private static final String LOCAL_PATH = "work/" + WarsawMapDownloader.class.getName() + "/Warsaw.osm";
 	
 	/**
 	 * Zwraca instancję File pliku lokalnego
@@ -98,19 +96,12 @@ public class WarsawMapDownloader {
 		
 		Date lastModifiedDate = DateUtils.parseDate(lastModifiedHeader.getValue());
 		
-		// Dane
-		byte[] responseBytes = EntityUtils.toByteArray(response.getEntity());
-		
-		// Zamknięcie połączenia
-		client.close();
-		response.close();
-		
 		// Utworzenie katalogu dla zdekodowanego pliku
 		FileUtils.forceMkdir(getLocal().getParentFile());
 		
 		// Dekodowanie gzip
 		GZIPInputStream gzipInputStream = new GZIPInputStream(
-			new ByteArrayInputStream(responseBytes)
+			response.getEntity().getContent()
 		);
 		
 		FileOutputStream fileOutputStream = new FileOutputStream(
@@ -121,6 +112,10 @@ public class WarsawMapDownloader {
 		
 		fileOutputStream.close();
 		gzipInputStream.close();
+		
+		// Zamknięcie połączenia
+		client.close();
+		response.close();
 		
 		// Zmiana daty ostatniej modyfikacji
 		getLocal().setLastModified(

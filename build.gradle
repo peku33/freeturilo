@@ -10,5 +10,12 @@ repositories {
 dependencies {
 	compile 'com.graphhopper:graphhopper-reader-osm:+'
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '+'
+	
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '+'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '+'
+	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '+'
+	
+	compile group: 'org.apache.commons', name: 'commons-text', version: '+'
+
     testImplementation 'junit:junit:+'
 }
