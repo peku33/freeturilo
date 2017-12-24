@@ -1,4 +1,4 @@
-package net.peku33.freeturilo;
+package net.peku33.freeturilo.core;
 
 import java.io.File;
 import java.io.FileOutputStream;

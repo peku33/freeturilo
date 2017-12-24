@@ -9,6 +9,7 @@ repositories {
 
 dependencies {
 	compile 'com.graphhopper:graphhopper-reader-osm:+'
+	
 	compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '+'
 	
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '+'
@@ -16,6 +17,8 @@ dependencies {
 	compile group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '+'
 	
 	compile group: 'org.apache.commons', name: 'commons-text', version: '+'
+	
+	compile group: 'org.jxmapviewer', name: 'jxmapviewer2', version: '+'
 
     testImplementation 'junit:junit:+'
 }

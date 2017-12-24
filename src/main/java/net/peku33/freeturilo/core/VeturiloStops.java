@@ -1,4 +1,4 @@
-package net.peku33.freeturilo;
+package net.peku33.freeturilo.core;
 
 import java.util.LinkedList;
 import java.util.logging.Logger;
