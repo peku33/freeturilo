@@ -1,7 +1,7 @@
 package net.peku33.freeturilo;
 
-import java.util.Collection;
 import java.util.LinkedList;
+import java.util.logging.Logger;
 
 import org.apache.commons.text.StringEscapeUtils;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -20,6 +20,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
  *
  */
 public class VeturiloStops {
+	
+	private static Logger logger = Logger.getLogger(WarsawMapDownloader.class.toString());
 	
 	/**
 	 * Dostęp przez singleton
@@ -88,7 +90,7 @@ public class VeturiloStops {
 	 * @return
 	 * @throws Exception
 	 */
-	private static Collection<VeturiloStop> jsonNodeToVeturiloStopCollection(JsonNode jsonNode) throws Exception {
+	private static LinkedList<VeturiloStop> jsonNodeToVeturiloStopLinkedList(JsonNode jsonNode) throws Exception {
 		
 		LinkedList<VeturiloStop> veturiloStops = new LinkedList<>();
 		
@@ -150,7 +152,7 @@ public class VeturiloStops {
 	/**
 	 * Lokalna kolekcja listy stacji
 	 */
-	private Collection<VeturiloStop> veturiloStopCollection;
+	private LinkedList<VeturiloStop> veturiloStopLinkedList;
 	
 	/**
 	 * Konstruktor, tworzy listę stacji
@@ -158,16 +160,27 @@ public class VeturiloStops {
 	 */
 	private VeturiloStops() throws Exception {
 		
+		logger.info("downloadMapPage start");
 		String mapPage = downloadMapPage();
+		logger.info("downloadMapPage end");
+		
+		logger.info("mapPageToJsonNode start");
 		JsonNode jsonNode = mapPageToJsonNode(mapPage);
-		veturiloStopCollection = jsonNodeToVeturiloStopCollection(jsonNode);
+		logger.info("mapPageToJsonNode end");
+		
+		logger.info("jsonNodeToVeturiloStopCollection start");
+		veturiloStopLinkedList = jsonNodeToVeturiloStopLinkedList(jsonNode);
+		logger.info("jsonNodeToVeturiloStopCollection end");
 	}
 	
 	/**
 	 * Getter listy stacji
 	 * @return
 	 */
-	public Collection<VeturiloStop> getVeturiloStopCollection() {
-		return veturiloStopCollection;
+	public Iterable<VeturiloStop> getVeturiloStopIterable() {
+		return veturiloStopLinkedList;
+	}
+	public int getVeturiloStopSize() {
+		return veturiloStopLinkedList.size();
 	}
 }
