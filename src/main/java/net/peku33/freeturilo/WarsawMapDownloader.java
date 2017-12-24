@@ -126,9 +126,11 @@ public class WarsawMapDownloader {
 	/**
 	 * Sprawdza, czy plik lokalny jest w najnowszej wersji
 	 * Jeśli nie istnieje - zostaje usunięty
+	 * 
+	 * @return Zwraca informację czy nastąpiła aktualizacja pliku
 	 * @throws Exception
 	 */
-	public static void checkUpdate() throws Exception {
+	public static boolean checkUpdate() throws Exception {
 		
 		Date localLastModified = getLocalLastModified();
 		logger.info("localLastModified: " + localLastModified);
@@ -138,7 +140,7 @@ public class WarsawMapDownloader {
 		
 		if(localLastModified != null && remoteLastModified != null && !(localLastModified.before(remoteLastModified))) {
 			logger.info("local in latest version, skipping download");
-			return;
+			return false;
 		}
 		
 		logger.info("local requires update");
@@ -146,6 +148,8 @@ public class WarsawMapDownloader {
 		logger.info("starting download");
 		update();
 		logger.info("finished download");
+		
+		return true;
 	}
 	
 	private WarsawMapDownloader() {}
