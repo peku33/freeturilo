@@ -27,9 +27,12 @@ public class VeturiloStops {
 	 * Dostęp przez singleton
 	 */
 	private static VeturiloStops instance;
-	public static VeturiloStops getInstance() throws Exception {
-		if(instance == null)
-			instance = new VeturiloStops();
+	private static Object getInstanceTSLock = new Object();
+	public static VeturiloStops getInstanceTS() throws Exception {
+		synchronized (getInstanceTSLock) {
+			if(instance == null)
+				instance = new VeturiloStops();
+		}
 		return instance;
 	}
 	
@@ -137,8 +140,7 @@ public class VeturiloStops {
 				
 				VeturiloStop veturiloStop = new VeturiloStop(
 					placeUid,
-					placeLatitude,
-					placeLongitude,
+					new GeoPoint(placeLatitude, placeLongitude),
 					placeName
 				);
 				
@@ -174,8 +176,7 @@ public class VeturiloStops {
 	}
 	
 	/**
-	 * Getter listy stacji
-	 * @return
+	 * Gettery. Kolekcje są niezmienne, więc raczej ThreadSafe
 	 */
 	public Iterable<VeturiloStop> getVeturiloStopIterable() {
 		return veturiloStopLinkedList;

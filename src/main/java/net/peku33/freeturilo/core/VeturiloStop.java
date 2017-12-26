@@ -1,5 +1,7 @@
 package net.peku33.freeturilo.core;
 
+import java.io.Serializable;
+
 /**
  * Klasa opisująca pojedynczą stację.
  * 
@@ -8,40 +10,33 @@ package net.peku33.freeturilo.core;
  * @author peku33
  *
  */
-public class VeturiloStop {
+public class VeturiloStop implements Serializable {
+	
+	private static final long serialVersionUID = 1L;
 	
 	private int uid;
-	
-	private double latitude;
-	private double longitude;
-	
+	private GeoPoint geoPoint;
 	private String name;
 
-	public VeturiloStop(int uid, double latitude, double longitude, String name) {
+	public VeturiloStop(int uid, GeoPoint geoPoint, String name) {
 		this.uid = uid;
-		this.latitude = latitude;
-		this.longitude = longitude;
+		this.geoPoint = geoPoint;
 		this.name = name;
 	}
 
 	public int getUid() {
 		return uid;
 	}
-
-	public double getLatitude() {
-		return latitude;
+	public GeoPoint getGeoPoint() {
+		return geoPoint;
 	}
-	public double getLongitude() {
-		return longitude;
-	}
-
 	public String getName() {
 		return name;
 	}
 	
 	@Override
 	public String toString() {
-		return String.format("#%d: %s (%f / %f)", uid, name, latitude, longitude);
+		return String.format("#%d: %s (%s)", uid, name, geoPoint);
 	}
 	
 	@Override

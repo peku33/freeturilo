@@ -26,10 +26,10 @@ public class WarsawMapDownloader {
 	private static Logger logger = Logger.getLogger(WarsawMapDownloader.class.toString());
 	
 	// Ścieżka do pobrania pliku .osm.gz
-	private static final String REMOTE_GZ_PATH = "https://download.bbbike.org/osm/bbbike/Warsaw/Warsaw.osm.gz";
+	private static final String remoteGzPath = "https://download.bbbike.org/osm/bbbike/Warsaw/Warsaw.osm.gz";
 	
 	// Ścieżka lokalnego pliku .osm
-	private static final String LOCAL_PATH = "work/" + WarsawMapDownloader.class.getName() + "/Warsaw.osm";
+	private static final String localPath = "work/" + WarsawMapDownloader.class.getName() + "/Warsaw.osm";
 	
 	/**
 	 * Zwraca instancję File pliku lokalnego
@@ -38,7 +38,7 @@ public class WarsawMapDownloader {
 	static File localInstance = null;
 	public static File getLocal() {
 		if(localInstance == null)
-			localInstance = new File(LOCAL_PATH);
+			localInstance = new File(localPath);
 		return localInstance;
 	}
 	
@@ -62,7 +62,7 @@ public class WarsawMapDownloader {
 	 * @throws Exception
 	 */
 	private static Date getRemoteLastModified() throws Exception {
-		HttpHead request = new HttpHead(REMOTE_GZ_PATH);
+		HttpHead request = new HttpHead(remoteGzPath);
 		CloseableHttpClient client = HttpClients.createDefault();
 		CloseableHttpResponse response = client.execute(request);
 		
@@ -85,7 +85,7 @@ public class WarsawMapDownloader {
 	private static void update() throws Exception {
 		
 		// Pobierz plik
-		HttpGet request = new HttpGet(REMOTE_GZ_PATH);
+		HttpGet request = new HttpGet(remoteGzPath);
 		CloseableHttpClient client = HttpClients.createDefault();
 		CloseableHttpResponse response = client.execute(request);
 		
