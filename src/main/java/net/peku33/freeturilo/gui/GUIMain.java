@@ -28,6 +28,7 @@ import javax.swing.WindowConstants;
 import javax.swing.event.MouseInputListener;
 
 import org.apache.commons.lang3.tuple.ImmutablePair;
+import org.apache.commons.lang3.tuple.ImmutableTriple;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
 import org.jxmapviewer.input.CenterMapListener;
@@ -44,7 +45,6 @@ import org.jxmapviewer.viewer.Waypoint;
 import org.jxmapviewer.viewer.WaypointPainter;
 
 import net.peku33.freeturilo.core.FreeTuriloRouter;
-import net.peku33.freeturilo.core.FreeTuriloRouter.OpeningClosing;
 import net.peku33.freeturilo.core.GeoPoint;
 import net.peku33.freeturilo.core.Path;
 import net.peku33.freeturilo.core.VeturiloStop;
@@ -352,16 +352,10 @@ public class GUIMain {
 		
 		jxMapViewer.repaint();
 		
-		class SwingWorkerResult {
-			public ImmutablePair<VeturiloStop, Path> openingPath;
-			public ImmutablePair<VeturiloStop, Path> closingPath;
-			public Iterable<ImmutablePair<VeturiloStop, Path>> veturiloStopPath;
-		}
-		
-		SwingWorker<SwingWorkerResult, Void> swingWorker = new SwingWorker<SwingWorkerResult, Void>() {
+		SwingWorker<ImmutableTriple<ImmutablePair<VeturiloStop, Path>, Iterable<ImmutablePair<VeturiloStop, Path>>, ImmutablePair<VeturiloStop, Path>>, Void> swingWorker = new SwingWorker<ImmutableTriple<ImmutablePair<VeturiloStop, Path>, Iterable<ImmutablePair<VeturiloStop, Path>>, ImmutablePair<VeturiloStop, Path>>, Void>() {
 
 			@Override
-			protected SwingWorkerResult doInBackground() throws Exception {
+			protected ImmutableTriple<ImmutablePair<VeturiloStop, Path>, Iterable<ImmutablePair<VeturiloStop, Path>>, ImmutablePair<VeturiloStop, Path>> doInBackground() throws Exception {
 				
 				// Pobieranie stanu
 				FreeTuriloRouter freeTuriloRouter;
@@ -371,63 +365,45 @@ public class GUIMain {
 					throw new RuntimeException(e);
 				}
 				
-				SwingWorkerResult swingWorkerResult = new SwingWorkerResult();
-				
-				// Od początku do stacji
-				swingWorkerResult.openingPath = freeTuriloRouter.findOpeningClosingPath(opening, OpeningClosing.OPENING);
-				
-				// Od stacji do końca
-				swingWorkerResult.closingPath = freeTuriloRouter.findOpeningClosingPath(closing, OpeningClosing.CLOSING);
-				
-				// Jeśli nie ma ścieżki od / do
-				if(swingWorkerResult.openingPath == null || swingWorkerResult.closingPath  == null)
-					return null;
-				
-				// Pomiędzy stacjami
-				swingWorkerResult.veturiloStopPath = freeTuriloRouter.findVeturiloStopPath(swingWorkerResult.openingPath.left, swingWorkerResult.closingPath.left);
-				
-				// Jeśli nie ma trasy rowerowej
-				if(swingWorkerResult.veturiloStopPath == null)
-					return null;
-				
-				return swingWorkerResult;
+				// Wyszukanie i zwrócenie ścieżki
+				return freeTuriloRouter.findPath(opening, closing);
 			}
 			
 			@Override
 			protected void done() {
-				SwingWorkerResult swingWorkerResult = null;
+				ImmutableTriple<ImmutablePair<VeturiloStop, Path>, Iterable<ImmutablePair<VeturiloStop, Path>>, ImmutablePair<VeturiloStop, Path>> path = null;
 				
 				try {
-					swingWorkerResult = get();
+					path = get();
 				} catch (Exception e) {
 					JOptionPane.showMessageDialog(mapTipsPanel, "swingWorkerResult Exception: " + e.toString(), "Error", JOptionPane.ERROR_MESSAGE);
 				}
 				
-				if(swingWorkerResult != null) {
+				if(path != null) {
 					// Kropki stacji
 					HashSet<Waypoint> veturiloStopPathWaypoints = new HashSet<Waypoint>();
-					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : swingWorkerResult.veturiloStopPath) {
+					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : path.middle) {
 						veturiloStopPathWaypoints.add(new DefaultWaypoint(veturiloStopPoint.left.getGeoPoint().getLatitude(), veturiloStopPoint.left.getGeoPoint().getLongitude()));
 					}
 					veturiloStopsWaypointPainter.setWaypoints(veturiloStopPathWaypoints);
 					
 					// Linia dojścia do
 					LinkedList<GeoPoint> openingPathPoints = new LinkedList<>();
-					for(GeoPoint geoPoint : swingWorkerResult.openingPath.right.getGeoPoints()) {
+					for(GeoPoint geoPoint : path.left.right.getGeoPoints()) {
 						openingPathPoints.add(geoPoint);
 					}
 					openingPathPainter.setRoute(openingPathPoints);
 					
 					// Linia z
 					LinkedList<GeoPoint> closingPathPoints = new LinkedList<>();
-					for(GeoPoint geoPoint : swingWorkerResult.closingPath.right.getGeoPoints()) {
+					for(GeoPoint geoPoint : path.right.right.getGeoPoints()) {
 						closingPathPoints.add(geoPoint);
 					}
 					closingPathPainter.setRoute(closingPathPoints);
 					
 					// Połączona ścieżka
 					LinkedList<GeoPoint> veturiloStopPathPoints = new LinkedList<>();
-					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : swingWorkerResult.veturiloStopPath) {
+					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : path.middle) {
 						
 						// Tras jest o 1 mniej niż punktów
 						if(veturiloStopPoint.right == null)
@@ -447,10 +423,10 @@ public class GUIMain {
 					// Instrukcje dojazdu
 					instructionsPanel.removeAll();
 					
-					JLabel openingLabel = new JLabel("Start: " + swingWorkerResult.openingPath.right.getTimeMillis() / 1000 / 60 + "min");
+					JLabel openingLabel = new JLabel("Start: " + path.left.right.getTimeMillis() / 1000 / 60 + "min");
 					instructionsPanel.add(openingLabel);
 					
-					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : swingWorkerResult.veturiloStopPath) {
+					for(ImmutablePair<VeturiloStop, Path> veturiloStopPoint : path.middle) {
 						
 						if(veturiloStopPoint.right != null) {
 							JLabel pathLabel = new JLabel("Bike: " + veturiloStopPoint.right.getTimeMillis() / 1000 / 60 + "min");
@@ -461,7 +437,7 @@ public class GUIMain {
 						instructionsPanel.add(veturiloStopLabel);
 					}
 					
-					JLabel closingLabel = new JLabel("End: " + swingWorkerResult.closingPath.right.getTimeMillis() / 1000 / 60 + "min");
+					JLabel closingLabel = new JLabel("End: " + path.right.right.getTimeMillis() / 1000 / 60 + "min");
 					instructionsPanel.add(closingLabel);
 					
 					instructionsPanel.revalidate();

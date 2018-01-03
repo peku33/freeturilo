@@ -469,5 +469,31 @@ public class FreeTuriloRouter {
 		return best;
 	}
 	
+	/**
+	 * All-in-one metoda znalezienia ścieżki pomiędzy dwoma punktami.
+	 * 
+	 * Ścieżka składa się z:
+	 * 		- (left) odcinka od from do najbliższej stacji / null jeśli nie istnieje
+	 * 		- (middle) kolekcji połączeń między stacjami / null jeśli nie istnieje
+	 * 		- (right) odcinka od najbliższej stacji do to / null jeśli nie istnieje
+	 * 
+	 * @param from Początkowa lokalizacja użytkownika (miejsce z którego użytkownik chce znalezc trasę)
+	 * @param to Końcowa lokalizacja użytkownika (miejsce do którego użytkownik chce znalezć trasę) 
+	 * @return Triple, jak w opisie ścieżki
+	 */
+	public ImmutableTriple<ImmutablePair<VeturiloStop, Path>, Iterable<ImmutablePair<VeturiloStop, Path>>, ImmutablePair<VeturiloStop, Path>> findPath(GeoPoint from, GeoPoint to) {
+		ImmutablePair<VeturiloStop, Path> openingPath = findOpeningClosingPath(from, OpeningClosing.OPENING);
+		ImmutablePair<VeturiloStop, Path> closingPath = findOpeningClosingPath(to, OpeningClosing.CLOSING);
+		
+		Iterable<ImmutablePair<VeturiloStop, Path>> veturiloStopPath = null;
+		if(openingPath != null && closingPath != null)
+			veturiloStopPath = findVeturiloStopPath(openingPath.left, closingPath.left);
+		
+		return new ImmutableTriple<ImmutablePair<VeturiloStop,Path>, Iterable<ImmutablePair<VeturiloStop,Path>>, ImmutablePair<VeturiloStop,Path>>(
+			openingPath,
+			veturiloStopPath,
+			closingPath
+		);
+	}
 	
 }
